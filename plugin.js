@@ -18,10 +18,13 @@ const defaultConfig = {
 };
 
 // Load configuration as defined in [MeteorProjectRoot/static-assets.json] file.
-const config = defaults(getConfig('static-assets.json'), defaultConfig),
-    getCustomPathFn = config.scanFolders ? getCustomPathFolders : getCustomPathScrict;
+const config = defaults(getConfig('static-assets.json'), defaultConfig);
 
 class StaticAssetsCompiler {
+  constructor() {
+    this.getCustomPathFn = config.scanFolders ? this._getCustomPathFolders : this._getCustomPathStrict;
+  }
+
   processFilesForTarget(files) {
     files.forEach((file) => {
       this.extendFile(file);
@@ -30,7 +33,7 @@ class StaticAssetsCompiler {
   }
 
   extendFile(file) {
-    file.getCustomPath = getCustomPathFn;
+    file.getCustomPath = this.getCustomPathFn;
   }
 
   processFile(file) {
@@ -52,6 +55,35 @@ class StaticAssetsCompiler {
       console.log(colors.blue('[Static Asset]'), msg);
     }
   }
+
+  // Original method from mys:fonts
+  _getCustomPathStrict() {
+    return config.map[this.getPathInPackage()];
+  }
+
+  // Extended method to match immediate parent folders in listed static assets.
+  _getCustomPathFolders() {
+    var truePath = this.getPathInPackage(),
+        customPath = config.map[truePath];
+
+    if (customPath) {
+      return customPath;
+    } else {
+      let slashPos = truePath.lastIndexOf("/") + 1, // getPathInPackage() always uses forward slashes. See https://docs.meteor.com/api/packagejs.html#build-plugin-api
+          folder = truePath.substring(0, slashPos),
+          fileName = truePath.substr(slashPos);
+
+      if (folder) {
+        customPath = config.map[folder];
+
+        if (customPath) {
+          return customPath + fileName;
+        }
+      }
+    }
+
+    return null;
+  }
 }
 
 Plugin.registerCompiler({
@@ -59,34 +91,6 @@ Plugin.registerCompiler({
 }, () => new StaticAssetsCompiler);
 
 
-// Original method from mys:fonts
-function getCustomPathScrict() {
-  return config.map[this.getPathInPackage()];
-}
-
-// Extended method to match immediate parent folders in listed static assets.
-function getCustomPathFolders() {
-  var truePath = this.getPathInPackage(),
-      customPath = config.map[truePath];
-
-  if (customPath) {
-    return customPath;
-  } else {
-    let slashPos = truePath.lastIndexOf("/") + 1, // getPathInPackage() always uses forward slashes. See https://docs.meteor.com/api/packagejs.html#build-plugin-api
-        folder = truePath.substring(0, slashPos),
-        fileName = truePath.substr(slashPos);
-
-    if (folder) {
-      customPath = config.map[folder];
-
-      if (customPath) {
-        return customPath + fileName;
-      }
-    }
-  }
-
-  return null;
-}
 
 function getConfig(configFileName) {
   var path = Plugin.path;
