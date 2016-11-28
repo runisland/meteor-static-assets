@@ -2,6 +2,7 @@ Package.describe({
   name: 'runisland:static-assets',
   version: '0.1.0',
   summary: 'Load static assets from dependencies (like node modules)',
+  git: 'https://github.com/runisland/meteor-static-assets',
   documentation: 'README.md'
 });
 
