@@ -15,12 +15,15 @@ _Derived from [`mys:fonts`](https://github.com/jellyjs/meteor-fonts) package._
 
 2. Create a `static-assets.json` file at the root of your Meteor project.
 
-3. List your static assets in the `"map"` hash map, following the convention: `"true/path/from/project/root/to/file.png": "target/path/in/public/folder/to/file.png"`
+3. List your static assets in the `"map"` hash map, following the convention:<br>
+`"true/path/from/project/root/to/file.png": "target/path/in/public/folder/to/file.png"`
+
+For example:
 
 ```json
 {
     "map": {
-        "node_modules/font-awesome/fonts/": "fonts/"
+        "node_modules/ionic-angular/fonts/": "fonts/"
     }
 }
 ```
